@@ -474,6 +474,7 @@ namespace PdfSharp.Pdf
             if (info.Elements[PdfDocumentInformation.Keys.Creator] is null)
                 info.Creator = PdfSharpProductVersionInformation.Producer;
 
+            /* //Commented due to PDFSharp is overwriting existing Producer set by developer
             // We set Producer if it is not yet set.
             var pdfProducer = PdfSharpProductVersionInformation.Creator;
 #if DEBUG
@@ -493,6 +494,7 @@ namespace PdfSharp.Pdf
                     producer = $"{pdfProducer} (Original: {producer})";
             }
             info.Elements.SetString(PdfDocumentInformation.Keys.Producer, producer);
+            */
 
             // Prepare used fonts.
             _fontTable?.PrepareForSave();
@@ -512,7 +514,8 @@ namespace PdfSharp.Pdf
 
             // #PDF-UA
             // Create PdfMetadata now to include the final document information in XMP generation.
-            Catalog.Elements.SetReference(PdfCatalog.Keys.Metadata, new PdfMetadata(this));
+            if (Options.ManualXmpGeneration == false) //By default, PDFSharp adding its own XMP Metadata which breaks PDF/A compliance of the pdf document, so make it optional
+                Catalog.Elements.SetReference(PdfCatalog.Keys.Metadata, new PdfMetadata(this));
         }
 
         /// <summary>

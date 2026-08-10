@@ -97,5 +97,12 @@ namespace PdfSharp.Pdf
 #else
         PdfWriterLayout _writerLayout = PdfWriterLayout.Compact;
 #endif
+
+        public bool ManualXmpGeneration
+        {
+            get => _manualXmpGeneration;
+            set => _manualXmpGeneration = value;
+        }
+        bool _manualXmpGeneration = false;
     }
 }
