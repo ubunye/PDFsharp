@@ -1,66 +1,42 @@
-# Ubunye PDFsharp Build and Package Publishing Pipeline
-trigger:
-  branches:
-    include:
-    - master
-
+trigger: none
 pr: none
 
 pool: 'Default'
 
-variables:
-  solution: 'PdfSharp.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-
 steps:
 - script:
-    echo "Starting PDFsharp Build & Package Pipeline"
   displayName: 'Start Build'
-
 - checkout: self
   lfs: true
 
-# Derive clean AssemblyVersion from PackageVersion variable if provided
+# Strip pre-release suffix for AssemblyVersion (e.g. 1.2.3-beta → 1.2.3.0)
 - powershell: |
-    if ("$(PackageVersion)" -ne "" -and "$(PackageVersion)" -ne "$`(PackageVersion`)") {
-      $clean = "$(PackageVersion)" -replace '-.*', ''
-      $assemblyVer = "$clean.0"
-    } else {
-      $assemblyVer = "6.2.4.1"
-    }
+    $clean = "$(PackageVersion)" -replace '-.*', ''
+    $assemblyVer = "$clean.0"
     Write-Host "##vso[task.setvariable variable=AssemblyVer]$assemblyVer"
     Write-Host "AssemblyVer set to: $assemblyVer"
   displayName: 'Set AssemblyVersion from PackageVersion'
 
-- task: NuGetToolInstaller@1
-  displayName: 'Install NuGet'
-
 - task: DotNetCoreCLI@2
-  displayName: 'Restore NuGet Packages'
+  displayName: 'Restore Nugets'
   inputs:
     command: 'restore'
-    projects: '$(solution)'
+    projects: 'PdfSharp.sln'
     feedsToUse: 'select'
     vstsFeed: 'DevOps/Ubunye'
 
 - task: VSBuild@1
-  displayName: 'Build PDFsharp Solution'
+  displayName: 'Build PDFsharp'
   inputs:
-    solution: '$(solution)'
+    solution: 'PdfSharp.sln'
     vsVersion: '18.0'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-    msbuildArgs: '/p:Version=$(PackageVersion) /p:PackageVersion=$(PackageVersion) /p:AssemblyVersion=$(AssemblyVer) /p:FileVersion=$(AssemblyVer) /p:PackageLocation="$(Build.ArtifactStagingDirectory)"'
-
-- task: VSTest@2
-  displayName: 'Run Unit Tests'
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    platform: 'any cpu'
+    configuration: 'release'
+    restoreNugetPackages: false
+    msbuildArgs: '/p:Version=$(PackageVersion) /p:AssemblyVersion=$(AssemblyVer) /p:FileVersion=$(AssemblyVer)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Push NuGet Packages'
+  displayName: 'Push Nugets'
   inputs:
     command: 'push'
     arguments: '--skip-duplicate'
