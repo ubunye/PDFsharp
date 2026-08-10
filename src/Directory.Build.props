@@ -7,6 +7,8 @@
     <!-- Found no other way to resolve the following warning than disable it -->
     <NoWarn>NU1507</NoWarn>
     <WriteVersionInfoToBuildLog>false</WriteVersionInfoToBuildLog>
+    <Version>6.2.4.1</Version>
+    <PackageVersion>6.2.4.1</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>

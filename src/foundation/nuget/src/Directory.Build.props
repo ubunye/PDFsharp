@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <ItemGroup>
@@ -29,6 +29,7 @@
     </ReadLinesFromFile>
 
     <PropertyGroup>
+      <PackageVersion>6.2.4.1</PackageVersion>
       <NuspecProperties>$(NuspecProperties);id=$(NuGetId)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);title=$(NuGetTitle)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);config=$(Configuration)</NuspecProperties>

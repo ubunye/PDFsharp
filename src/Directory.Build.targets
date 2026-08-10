@@ -3,5 +3,14 @@
     <!-- USE_LONG_SIZE: Read/write PDF files larger than 2 GiB -->
     <!-- TEST_CODE - Must be set to TEST_CODE_xxx in every release build. DO NOT RENAME TO TEST_CODE_ -->
     <DefineConstants>$(DefineConstants);USE_LONG_SIZE;TEST_CODE_xxx</DefineConstants>
+    <Version>6.2.4.1</Version>
+    <PackageVersion>6.2.4.1</PackageVersion>
   </PropertyGroup>
+  <Target Name="OverrideNuGetVersion" AfterTargets="GetVersion;GitVersion" BeforeTargets="GenerateNuspec;Pack">
+    <PropertyGroup>
+      <PackageVersion>6.2.4.1</PackageVersion>
+      <Version>6.2.4.1</Version>
+      <GitVersion_NuGetVersion>6.2.4.1</GitVersion_NuGetVersion>
+    </PropertyGroup>
+  </Target>
 </Project>

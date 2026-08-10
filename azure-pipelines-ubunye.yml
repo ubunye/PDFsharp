@@ -1,0 +1,70 @@
+# Ubunye PDFsharp Build and Package Publishing Pipeline
+trigger:
+  branches:
+    include:
+    - master
+
+pr: none
+
+pool: 'Default'
+
+variables:
+  solution: 'PdfSharp.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- script:
+    echo "Starting PDFsharp Build & Package Pipeline"
+  displayName: 'Start Build'
+
+- checkout: self
+  lfs: true
+
+# Derive clean AssemblyVersion from PackageVersion variable if provided
+- powershell: |
+    if ("$(PackageVersion)" -ne "" -and "$(PackageVersion)" -ne "$`(PackageVersion`)") {
+      $clean = "$(PackageVersion)" -replace '-.*', ''
+      $assemblyVer = "$clean.0"
+    } else {
+      $assemblyVer = "6.2.4.1"
+    }
+    Write-Host "##vso[task.setvariable variable=AssemblyVer]$assemblyVer"
+    Write-Host "AssemblyVer set to: $assemblyVer"
+  displayName: 'Set AssemblyVersion from PackageVersion'
+
+- task: NuGetToolInstaller@1
+  displayName: 'Install NuGet'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet Packages'
+  inputs:
+    command: 'restore'
+    projects: '$(solution)'
+    feedsToUse: 'select'
+    vstsFeed: 'DevOps/Ubunye'
+
+- task: VSBuild@1
+  displayName: 'Build PDFsharp Solution'
+  inputs:
+    solution: '$(solution)'
+    vsVersion: '18.0'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    msbuildArgs: '/p:Version=$(PackageVersion) /p:PackageVersion=$(PackageVersion) /p:AssemblyVersion=$(AssemblyVer) /p:FileVersion=$(AssemblyVer) /p:PackageLocation="$(Build.ArtifactStagingDirectory)"'
+
+- task: VSTest@2
+  displayName: 'Run Unit Tests'
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Push NuGet Packages'
+  inputs:
+    command: 'push'
+    arguments: '--skip-duplicate'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'DevOps/Ubunye'
+    publishPackageMetadata: false
