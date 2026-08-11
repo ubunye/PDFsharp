@@ -35,12 +35,20 @@ steps:
     restoreNugetPackages: false
     msbuildArgs: '/p:Version=$(PackageVersion) /p:AssemblyVersion=$(AssemblyVer) /p:FileVersion=$(AssemblyVer)'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Push Nugets'
+# Download .nupkg files from pipeline run → Artifacts tab instead
+- task: PublishPipelineArtifact@1
+  displayName: 'Upload for Manual Check'
   inputs:
-    command: 'push'
-    arguments: '--skip-duplicate'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: 'DevOps/Ubunye'
-    publishPackageMetadata: false
+    targetPath: '$(Build.ArtifactStagingDirectory)'
+    artifact: 'nuget-packages'
+    publishLocation: 'pipeline'
+
+# - task: DotNetCoreCLI@2
+#   displayName: 'Push Nugets'
+#   inputs:
+#     command: 'push'
+#     arguments: '--skip-duplicate'
+#     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+#     nuGetFeedType: 'internal'
+#     publishVstsFeed: 'DevOps/Ubunye'
+#     publishPackageMetadata: false
