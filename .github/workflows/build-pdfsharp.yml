@@ -46,9 +46,20 @@ jobs:
         run: |
           dotnet test src/foundation/src/PDFsharp/tests/PdfSharp.Tests/PdfSharp.Tests.csproj --configuration Release --no-build
 
+      - name: Collect NuGet Packages into Flat Directory
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path nupkgs
+          Get-ChildItem -Path src/foundation/nuget/src -Filter *.nupkg -Recurse | Copy-Item -Destination nupkgs/
+
       - name: Upload NuGet Packages as Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: nuget-packages-6.2.4.1
-          path: |
-            src/foundation/nuget/src/**/*.nupkg
+          path: nupkgs/*.nupkg
+
+      # To push directly to your Azure DevOps / private feed when ready:
+      # - name: Push NuGet Packages to Private Feed
+      #   shell: pwsh
+      #   run: |
+      #     dotnet nuget push "nupkgs/*.nupkg" --source "https://pkgs.dev.azure.com/YourOrg/_packaging/DevOps%2FUbunye/nuget/v3/index.json" --api-key "${{ secrets.AZURE_DEVOPS_PAT }}" --skip-duplicate
