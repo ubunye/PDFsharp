@@ -98,6 +98,10 @@ namespace PdfSharp.Pdf
         PdfWriterLayout _writerLayout = PdfWriterLayout.Compact;
 #endif
 
+        /// <summary>
+        /// Gets or sets a value indicating whether XMP metadata generation is handled manually.
+        /// When true, automatic XMP metadata generation during document save is bypassed to prevent duplicate XMP metadata that breaks PDF/A compliance.
+        /// </summary>
         public bool ManualXmpGeneration
         {
             get => _manualXmpGeneration;
